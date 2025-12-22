@@ -156,6 +156,7 @@
               {{ content?.completeText || 'Marquer terminée' }}
             </button>
             <button
+              v-if="step.canEdit"
               class="action-button edit-button"
               @click.stop="handleEdit(step.id)"
             >
@@ -163,6 +164,7 @@
               {{ content?.editText || 'Modifier' }}
             </button>
             <button
+              v-if="step.canDelete"
               class="action-button delete-button"
               @click.stop="handleDelete(step.id)"
             >
@@ -269,6 +271,9 @@ export default {
         // Auto-detect RDV if rdvType exists but isRdv is not explicitly set
         const finalIsRdv = Boolean(isRdv) || Boolean(rdvType);
 
+        // Core flag - prevents edit/delete for core steps
+        const isCore = Boolean(item?.core);
+
         return {
           id: String(id),
           title: String(title),
@@ -281,6 +286,9 @@ export default {
           isRdv: finalIsRdv,
           rdvType: rdvType ? String(rdvType) : null,
           meetingLink: meetingLink ? String(meetingLink) : null,
+          core: isCore,
+          canEdit: !isCore,
+          canDelete: !isCore,
           originalItem: item,
         };
       }).sort((a, b) => a.order - b.order);
