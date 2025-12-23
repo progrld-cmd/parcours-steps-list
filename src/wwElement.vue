@@ -225,6 +225,10 @@ export default {
       const isRdvPath = props.content?.isRdvField || 'est_rdv';
       const rdvTypePath = props.content?.rdvTypeField || 'type_rdv';
       const meetingLinkPath = props.content?.meetingLinkField || 'lien_visio';
+      const isCompletedPath = props.content?.isCompletedField || 'complete';
+      const corePath = props.content?.coreField || 'core';
+      const dateRdvPath = props.content?.dateRdvField || 'date_rdv';
+      const heureRdvPath = props.content?.heureRdvField || 'heure_rdv';
 
       // Try to use formula mapping if available (for bound data)
       let resolveMappingFormula = null;
@@ -242,6 +246,7 @@ export default {
       return rawSteps.map((item, index) => {
         // Try formula first, then fallback to path lookup
         let id, title, order, status, isVisible, resources, date, isRdv, rdvType, meetingLink;
+        let isCompletedFormula, isCore, dateRdv, heureRdv;
 
         if (resolveMappingFormula) {
           id = resolveMappingFormula(props.content?.stepsIdFormula, item);
@@ -254,6 +259,10 @@ export default {
           isRdv = resolveMappingFormula(props.content?.stepsIsRdvFormula, item);
           rdvType = resolveMappingFormula(props.content?.stepsRdvTypeFormula, item);
           meetingLink = resolveMappingFormula(props.content?.stepsMeetingLinkFormula, item);
+          isCompletedFormula = resolveMappingFormula(props.content?.stepsIsCompletedFormula, item);
+          isCore = resolveMappingFormula(props.content?.stepsIsCoreFormula, item);
+          dateRdv = resolveMappingFormula(props.content?.stepsDateRdvFormula, item);
+          heureRdv = resolveMappingFormula(props.content?.stepsHeureRdvFormula, item);
         }
 
         // Fallback to path-based lookup
@@ -261,18 +270,44 @@ export default {
         title = title ?? getNestedValue(item, titlePath) ?? item?.titre ?? item?.title ?? 'Sans titre';
         order = order ?? getNestedValue(item, orderPath) ?? item?.ordre ?? item?.order ?? (index + 1);
         status = status ?? getNestedValue(item, statusPath) ?? item?.statut ?? item?.status ?? '';
-        isVisible = isVisible ?? getNestedValue(item, visiblePath) ?? item?.est_visible_beneficiaire ?? item?.isVisible ?? true;
+        isVisible = isVisible ?? getNestedValue(item, visiblePath) ?? item?.est_visible_beneficiaire ?? item?.isVisible ?? item?.visible ?? true;
         resources = resources ?? getNestedValue(item, resourcesPath) ?? item?.ressources ?? item?.resources ?? [];
         date = date ?? getNestedValue(item, datePath) ?? item?.date ?? null;
         isRdv = isRdv ?? getNestedValue(item, isRdvPath) ?? item?.est_rdv ?? item?.isRdv ?? item?.is_rdv ?? false;
         rdvType = rdvType ?? getNestedValue(item, rdvTypePath) ?? item?.type_rdv ?? item?.rdvType ?? item?.meeting_type ?? null;
         meetingLink = meetingLink ?? getNestedValue(item, meetingLinkPath) ?? item?.lien_visio ?? item?.meetingLink ?? item?.meeting_link ?? null;
+        isCompletedFormula = isCompletedFormula ?? getNestedValue(item, isCompletedPath) ?? item?.complete ?? item?.is_completed ?? null;
+        isCore = isCore ?? getNestedValue(item, corePath) ?? item?.core ?? item?.is_core ?? false;
+        dateRdv = dateRdv ?? getNestedValue(item, dateRdvPath) ?? item?.date_rdv ?? null;
+        heureRdv = heureRdv ?? getNestedValue(item, heureRdvPath) ?? item?.heure_rdv ?? null;
 
         // Auto-detect RDV if rdvType exists but isRdv is not explicitly set
-        const finalIsRdv = Boolean(isRdv) || Boolean(rdvType);
+        const finalIsRdv = Boolean(isRdv) || Boolean(rdvType) || Boolean(dateRdv) || Boolean(heureRdv);
+
+        // Determine completed status: use boolean field if available, otherwise compare status string
+        let finalIsCompleted;
+        if (isCompletedFormula !== null && isCompletedFormula !== undefined) {
+          finalIsCompleted = Boolean(isCompletedFormula);
+        } else {
+          finalIsCompleted = String(status).toLowerCase() === String(completedValue).toLowerCase();
+        }
 
         // Core flag - prevents edit/delete for core steps
-        const isCore = Boolean(item?.core);
+        const finalIsCore = Boolean(isCore);
+
+        // Build combined date string for RDV (date + time)
+        let combinedDate = date;
+        if (finalIsRdv && (dateRdv || heureRdv)) {
+          const datePart = dateRdv ? String(dateRdv) : '';
+          const timePart = heureRdv ? String(heureRdv) : '';
+          if (datePart && timePart) {
+            combinedDate = `${datePart} à ${timePart}`;
+          } else if (datePart) {
+            combinedDate = datePart;
+          } else if (timePart) {
+            combinedDate = timePart;
+          }
+        }
 
         return {
           id: String(id),
@@ -280,15 +315,15 @@ export default {
           order: Number(order) || (index + 1),
           status: String(status || ''),
           isVisible: Boolean(isVisible),
-          isCompleted: String(status).toLowerCase() === String(completedValue).toLowerCase(),
+          isCompleted: finalIsCompleted,
           resources: Array.isArray(resources) ? resources : [],
-          date: date ? String(date) : null,
+          date: combinedDate ? String(combinedDate) : null,
           isRdv: finalIsRdv,
           rdvType: rdvType ? String(rdvType) : null,
           meetingLink: meetingLink ? String(meetingLink) : null,
-          core: isCore,
-          canEdit: !isCore,
-          canDelete: !isCore,
+          core: finalIsCore,
+          canEdit: !finalIsCore,
+          canDelete: !finalIsCore,
           originalItem: item,
         };
       }).sort((a, b) => a.order - b.order);

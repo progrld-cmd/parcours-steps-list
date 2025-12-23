@@ -400,6 +400,118 @@ export default {
       },
       /* wwEditor:end */
     },
+    stepsIsCompletedFormula: {
+      label: { en: 'Completed Field', fr: 'Champ Terminé' },
+      type: 'Formula',
+      section: 'settings',
+      options: (content) => ({
+        template:
+          Array.isArray(content?.steps) && content.steps.length > 0
+            ? content.steps[0]
+            : null,
+      }),
+      defaultValue: {
+        type: 'f',
+        code: "context.mapping?.['complete']",
+      },
+      hidden: (content, sidepanelContent, boundProps) =>
+        !Array.isArray(content?.steps) ||
+        !content?.steps?.length ||
+        !boundProps?.steps,
+      /* wwEditor:start */
+      bindingValidation: {
+        type: 'boolean',
+        tooltip: 'Formula to determine if step is completed (boolean)',
+      },
+      propertyHelp: {
+        tooltip: 'Select the field that indicates if the step is completed (e.g., "complete")',
+      },
+      /* wwEditor:end */
+    },
+    stepsIsCoreFormula: {
+      label: { en: 'Core Field', fr: 'Champ Core' },
+      type: 'Formula',
+      section: 'settings',
+      options: (content) => ({
+        template:
+          Array.isArray(content?.steps) && content.steps.length > 0
+            ? content.steps[0]
+            : null,
+      }),
+      defaultValue: {
+        type: 'f',
+        code: "context.mapping?.['core']",
+      },
+      hidden: (content, sidepanelContent, boundProps) =>
+        !Array.isArray(content?.steps) ||
+        !content?.steps?.length ||
+        !boundProps?.steps,
+      /* wwEditor:start */
+      bindingValidation: {
+        type: 'boolean',
+        tooltip: 'Formula to determine if step is a core step (cannot be edited/deleted)',
+      },
+      propertyHelp: {
+        tooltip: 'Select the field that indicates if the step is a core step',
+      },
+      /* wwEditor:end */
+    },
+    stepsDateRdvFormula: {
+      label: { en: 'RDV Date Field', fr: 'Champ Date RDV' },
+      type: 'Formula',
+      section: 'settings',
+      options: (content) => ({
+        template:
+          Array.isArray(content?.steps) && content.steps.length > 0
+            ? content.steps[0]
+            : null,
+      }),
+      defaultValue: {
+        type: 'f',
+        code: "context.mapping?.['date_rdv']",
+      },
+      hidden: (content, sidepanelContent, boundProps) =>
+        !Array.isArray(content?.steps) ||
+        !content?.steps?.length ||
+        !boundProps?.steps,
+      /* wwEditor:start */
+      bindingValidation: {
+        type: 'string',
+        tooltip: 'Formula to extract RDV date',
+      },
+      propertyHelp: {
+        tooltip: 'Select the field that contains the appointment date',
+      },
+      /* wwEditor:end */
+    },
+    stepsHeureRdvFormula: {
+      label: { en: 'RDV Time Field', fr: 'Champ Heure RDV' },
+      type: 'Formula',
+      section: 'settings',
+      options: (content) => ({
+        template:
+          Array.isArray(content?.steps) && content.steps.length > 0
+            ? content.steps[0]
+            : null,
+      }),
+      defaultValue: {
+        type: 'f',
+        code: "context.mapping?.['heure_rdv']",
+      },
+      hidden: (content, sidepanelContent, boundProps) =>
+        !Array.isArray(content?.steps) ||
+        !content?.steps?.length ||
+        !boundProps?.steps,
+      /* wwEditor:start */
+      bindingValidation: {
+        type: 'string',
+        tooltip: 'Formula to extract RDV time',
+      },
+      propertyHelp: {
+        tooltip: 'Select the field that contains the appointment time',
+      },
+      /* wwEditor:end */
+    },
 
     // ===== FALLBACK FIELD PATHS (for non-bound data) =====
     idField: {
@@ -519,6 +631,54 @@ export default {
       /* wwEditor:start */
       propertyHelp: {
         tooltip: 'Property path for meeting link (e.g., "lien_visio" or "meeting_url")',
+      },
+      /* wwEditor:end */
+    },
+    isCompletedField: {
+      label: { en: 'Completed Property Path', fr: 'Chemin propriété Terminé' },
+      type: 'Text',
+      section: 'settings',
+      defaultValue: 'complete',
+      hidden: (content, sidepanelContent, boundProps) => boundProps?.steps,
+      /* wwEditor:start */
+      propertyHelp: {
+        tooltip: 'Property path for completed boolean (e.g., "complete" or "is_completed")',
+      },
+      /* wwEditor:end */
+    },
+    coreField: {
+      label: { en: 'Core Property Path', fr: 'Chemin propriété Core' },
+      type: 'Text',
+      section: 'settings',
+      defaultValue: 'core',
+      hidden: (content, sidepanelContent, boundProps) => boundProps?.steps,
+      /* wwEditor:start */
+      propertyHelp: {
+        tooltip: 'Property path for core flag (e.g., "core" or "is_core")',
+      },
+      /* wwEditor:end */
+    },
+    dateRdvField: {
+      label: { en: 'RDV Date Property Path', fr: 'Chemin propriété Date RDV' },
+      type: 'Text',
+      section: 'settings',
+      defaultValue: 'date_rdv',
+      hidden: (content, sidepanelContent, boundProps) => boundProps?.steps,
+      /* wwEditor:start */
+      propertyHelp: {
+        tooltip: 'Property path for RDV date (e.g., "date_rdv")',
+      },
+      /* wwEditor:end */
+    },
+    heureRdvField: {
+      label: { en: 'RDV Time Property Path', fr: 'Chemin propriété Heure RDV' },
+      type: 'Text',
+      section: 'settings',
+      defaultValue: 'heure_rdv',
+      hidden: (content, sidepanelContent, boundProps) => boundProps?.steps,
+      /* wwEditor:start */
+      propertyHelp: {
+        tooltip: 'Property path for RDV time (e.g., "heure_rdv")',
       },
       /* wwEditor:end */
     },
