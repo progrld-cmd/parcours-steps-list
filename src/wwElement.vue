@@ -41,15 +41,20 @@
         <div class="card-content">
           <!-- Header Row -->
           <div class="card-header">
-            <!-- Status Icon -->
-            <div class="status-icon" :class="{ completed: step.isCompleted }">
+            <!-- Status Icon (clickable to toggle completion) -->
+            <button
+              class="status-icon-btn"
+              :class="{ completed: step.isCompleted }"
+              @click.stop="handleToggleComplete(step.id, !step.isCompleted)"
+              :title="step.isCompleted ? 'Marquer comme non terminée' : 'Marquer comme terminée'"
+            >
               <svg v-if="step.isCompleted" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
               <svg v-else viewBox="0 0 24 24" fill="currentColor">
                 <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
               </svg>
-            </div>
+            </button>
 
             <!-- Title -->
             <h3 class="step-title">{{ step.order }}. {{ step.title }}</h3>
@@ -124,25 +129,24 @@
             </div>
           </div>
 
-          <!-- Visibility Section -->
+          <!-- Visibility Section (clickable to toggle) -->
           <div v-if="content?.showVisibility !== false" class="visibility-section">
-            <span v-if="step.isVisible" class="visibility-badge visible">
-              <span class="visibility-icon">&#x1F441;</span>
-              {{ content?.visibleText || 'Visible par le bénéficiaire' }}
-            </span>
-            <template v-else>
-              <span class="visibility-badge hidden">
-                <span class="visibility-icon">&#x1F512;</span>
-                {{ content?.hiddenText || 'Masquée pour le bénéficiaire' }}
-              </span>
-              <button
-                class="unlock-button"
-                @click.stop="handleToggleVisibility(step.id, true)"
-              >
-                <span class="button-icon">&#x1F513;</span>
-                {{ content?.unlockText || 'Débloquer cette étape' }}
-              </button>
-            </template>
+            <button
+              class="visibility-badge-btn"
+              :class="{ visible: step.isVisible, hidden: !step.isVisible }"
+              @click.stop="handleToggleVisibility(step.id, !step.isVisible)"
+              :title="step.isVisible ? 'Masquer pour le bénéficiaire' : 'Rendre visible pour le bénéficiaire'"
+            >
+              <!-- Eye icon (visible) -->
+              <svg v-if="step.isVisible" class="visibility-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+              </svg>
+              <!-- Eye off icon (hidden) -->
+              <svg v-else class="visibility-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+              </svg>
+              <span>{{ step.isVisible ? (content?.visibleText || 'Visible pour le bénéficiaire') : (content?.hiddenText || 'Masqué pour le bénéficiaire') }}</span>
+            </button>
           </div>
 
           <!-- Actions Section -->
@@ -451,6 +455,13 @@ export default {
       });
     };
 
+    const handleToggleComplete = (stepId, completed) => {
+      emit('trigger-event', {
+        name: 'step-complete',
+        event: { stepId, completed },
+      });
+    };
+
     const handleEdit = (stepId) => {
       emit('trigger-event', {
         name: 'step-edit',
@@ -501,6 +512,7 @@ export default {
       handleDrop,
       handleToggleVisibility,
       handleComplete,
+      handleToggleComplete,
       handleEdit,
       handleDelete,
     };
@@ -615,6 +627,38 @@ export default {
 
   &.completed {
     color: var(--completed-color);
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.status-icon-btn {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #d1d5db;
+  transition: all 0.15s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    color: #9ca3af;
+  }
+
+  &.completed {
+    color: var(--completed-color);
+
+    &:hover {
+      color: var(--completed-color);
+      filter: brightness(1.1);
+    }
   }
 
   svg {
@@ -795,6 +839,51 @@ export default {
   &.hidden {
     background: rgba(156, 163, 175, 0.1);
     color: var(--hidden-badge-color);
+  }
+}
+
+.visibility-badge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  .visibility-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &.visible {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--visible-badge-color);
+
+    &:hover {
+      background: rgba(34, 197, 94, 0.15);
+    }
+  }
+
+  &.hidden {
+    background: rgba(156, 163, 175, 0.1);
+    color: var(--hidden-badge-color);
+
+    &:hover {
+      background: rgba(156, 163, 175, 0.15);
+    }
   }
 }
 
