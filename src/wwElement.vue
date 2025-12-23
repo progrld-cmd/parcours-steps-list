@@ -115,17 +115,36 @@
             v-if="content?.showResources !== false && step.resources?.length"
             class="resources-section"
           >
-            <span class="resources-label">{{ content?.resourcesLabel || 'Ressources :' }}</span>
-            <div class="resources-chips">
-              <span
+            <div class="resources-list">
+              <a
                 v-for="(resource, rIndex) in step.resources"
                 :key="rIndex"
-                class="resource-chip"
+                :href="getResourceUrl(resource)"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="resource-card"
+                @click.stop
               >
-                <span class="resource-icon">&#x1F4CE;</span>
-                {{ getResourceName(resource) }}
-                <span v-if="getResourceType(resource)" class="resource-type">({{ getResourceType(resource) }})</span>
-              </span>
+                <!-- File Icon -->
+                <div class="resource-file-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                  </svg>
+                </div>
+                <!-- File Info -->
+                <div class="resource-info">
+                  <span class="resource-name">{{ getResourceName(resource) }}</span>
+                  <span class="resource-meta">
+                    {{ getResourceType(resource) || 'Fichier' }}
+                    <span v-if="getResourceSize(resource)"> • {{ getResourceSize(resource) }}</span>
+                  </span>
+                </div>
+                <!-- Open Button -->
+                <span class="resource-open-btn">
+                  <span class="open-dot"></span>
+                  {{ content?.openResourceText || 'Ouvrir' }}
+                </span>
+              </a>
             </div>
           </div>
 
@@ -353,7 +372,26 @@ export default {
 
     const getResourceType = (resource) => {
       if (typeof resource === 'string') return null;
-      return resource?.type ?? resource?.extension ?? null;
+      return resource?.type ?? resource?.extension ?? resource?.mime_type?.split('/').pop()?.toUpperCase() ?? null;
+    };
+
+    const getResourceUrl = (resource) => {
+      if (typeof resource === 'string') return resource;
+      return resource?.url ?? resource?.href ?? resource?.link ?? resource?.path ?? resource?.src ?? '#';
+    };
+
+    const getResourceSize = (resource) => {
+      if (typeof resource === 'string') return null;
+      const size = resource?.size ?? resource?.fileSize ?? resource?.file_size ?? null;
+      if (!size) return null;
+
+      // Convert bytes to human readable format
+      const bytes = Number(size);
+      if (isNaN(bytes)) return size; // Already formatted
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+      if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+      return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
     };
 
     // ===== RDV HELPERS =====
@@ -503,6 +541,8 @@ export default {
       cssVariables,
       getResourceName,
       getResourceType,
+      getResourceUrl,
+      getResourceSize,
       isRemoteRdv,
       getRdvTypeLabel,
       handleDragStart,
@@ -773,12 +813,86 @@ export default {
 
 .resources-section {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
   padding-left: 36px;
 }
 
+.resources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.resource-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #faf5ff;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #f3e8ff;
+    transform: translateY(-1px);
+  }
+}
+
+.resource-file-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  color: #a855f7;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.resource-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.resource-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resource-meta {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.resource-open-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ec4899;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+
+  .open-dot {
+    width: 8px;
+    height: 8px;
+    background: #ec4899;
+    border-radius: 50%;
+  }
+}
+
+/* Old chip styles kept for backwards compatibility */
 .resources-label {
   font-size: 13px;
   color: #6b7280;

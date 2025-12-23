@@ -49,8 +49,8 @@ export default {
           statut: 'terminee',
           est_visible_beneficiaire: true,
           ressources: [
-            { nom: 'Guide des métiers du numérique', type: 'PDF' },
-            { nom: 'Template CV moderne', type: 'DOCX' },
+            { nom: 'Guide des métiers du numérique', type: 'PDF', size: '2621440', url: '#' },
+            { nom: 'Template CV moderne', type: 'DOCX', size: '512000', url: '#' },
           ],
         },
         {
@@ -71,7 +71,7 @@ export default {
           ordre: 3,
           statut: 'en_cours',
           est_visible_beneficiaire: true,
-          ressources: [{ nom: 'Liste des formations certifiantes', type: 'XLSX' }],
+          ressources: [{ nom: 'Liste des formations certifiantes', type: 'XLSX', size: '156000', url: '#' }],
         },
         {
           id: 'step-4',
@@ -898,6 +898,19 @@ export default {
       bindingValidation: {
         type: 'string',
         tooltip: 'Label shown before resource chips',
+      },
+      /* wwEditor:end */
+    },
+    openResourceText: {
+      label: { en: 'Open Resource Text', fr: 'Texte ouvrir ressource' },
+      type: 'Text',
+      section: 'settings',
+      defaultValue: 'Ouvrir',
+      bindable: true,
+      /* wwEditor:start */
+      bindingValidation: {
+        type: 'string',
+        tooltip: 'Text for the open resource button',
       },
       /* wwEditor:end */
     },
