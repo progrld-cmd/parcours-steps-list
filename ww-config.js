@@ -716,24 +716,6 @@ export default {
       /* wwEditor:end */
     },
 
-    // ===== SUPABASE STORAGE =====
-    supabaseStorageUrl: {
-      label: { en: 'Supabase Storage Base URL', fr: 'URL de base Supabase Storage' },
-      type: 'Text',
-      section: 'settings',
-      defaultValue: '',
-      bindable: true,
-      /* wwEditor:start */
-      bindingValidation: {
-        type: 'string',
-        tooltip: 'Base URL for Supabase Storage (e.g., https://xxx.supabase.co/storage/v1/object/public/bucket/)',
-      },
-      propertyHelp: {
-        tooltip: 'If your resources use file_path instead of full URL, enter the Supabase Storage base URL here. The file_path will be appended to this URL.',
-      },
-      /* wwEditor:end */
-    },
-
     // ===== DISPLAY OPTIONS =====
     enableDragDrop: {
       label: { en: 'Enable Drag & Drop', fr: 'Activer glisser-déposer' },
