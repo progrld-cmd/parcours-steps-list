@@ -392,9 +392,28 @@ export default {
 
     const getResourceUrl = (resource) => {
       if (typeof resource === 'string') return resource;
-      // Support Supabase: url, file_path fields
-      // Also support: href, link, path, src
-      return resource?.url ?? resource?.file_path ?? resource?.href ?? resource?.link ?? resource?.path ?? resource?.src ?? '#';
+
+      // If full URL exists, use it directly
+      if (resource?.url && resource.url.startsWith('http')) {
+        return resource.url;
+      }
+
+      // If file_path exists, build URL with Supabase Storage base URL
+      const filePath = resource?.file_path ?? resource?.path ?? resource?.src ?? null;
+      if (filePath) {
+        const baseUrl = props.content?.supabaseStorageUrl;
+        if (baseUrl) {
+          // Ensure base URL ends with / and file_path doesn't start with /
+          const cleanBase = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
+          const cleanPath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
+          return cleanBase + cleanPath;
+        }
+        // If no base URL configured, return file_path as-is (might be full URL)
+        if (filePath.startsWith('http')) return filePath;
+      }
+
+      // Fallback to other URL fields
+      return resource?.url ?? resource?.href ?? resource?.link ?? '#';
     };
 
     const getResourceSize = (resource) => {
