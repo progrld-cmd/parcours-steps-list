@@ -33,6 +33,21 @@ export default {
       label: { en: 'On step delete', fr: 'Suppression étape' },
       event: { stepId: '' },
     },
+    {
+      name: 'resource-click',
+      label: { en: 'On resource click', fr: 'Clic sur ressource' },
+      event: {
+        stepId: '',
+        resource: {
+          id: '',
+          name: '',
+          file_path: '',
+          url: '',
+          type: '',
+          format: '',
+        }
+      },
+    },
   ],
   properties: {
     // ===== DATA SECTION =====

@@ -116,14 +116,12 @@
             class="resources-section"
           >
             <div class="resources-list">
-              <a
+              <button
                 v-for="(resource, rIndex) in step.resources"
                 :key="rIndex"
-                :href="getResourceUrl(resource)"
-                target="_blank"
-                rel="noopener noreferrer"
+                type="button"
                 class="resource-card"
-                @click.stop
+                @click.stop="handleResourceClick(step.id, resource)"
               >
                 <!-- File Icon -->
                 <div class="resource-file-icon">
@@ -144,7 +142,7 @@
                   <span class="open-dot"></span>
                   {{ content?.openResourceText || 'Ouvrir' }}
                 </span>
-              </a>
+              </button>
             </div>
           </div>
 
@@ -550,6 +548,23 @@ export default {
       });
     };
 
+    const handleResourceClick = (stepId, resource) => {
+      emit('trigger-event', {
+        name: 'resource-click',
+        event: {
+          stepId,
+          resource: {
+            id: resource?.id ?? null,
+            name: resource?.name ?? resource?.nom ?? null,
+            file_path: resource?.file_path ?? null,
+            url: resource?.url ?? null,
+            type: resource?.type ?? null,
+            format: resource?.format ?? null,
+          },
+        },
+      });
+    };
+
     // ===== CSS VARIABLES =====
     const cssVariables = computed(() => ({
       '--card-background': props.content?.cardBackground || '#ffffff',
@@ -591,6 +606,7 @@ export default {
       handleToggleComplete,
       handleEdit,
       handleDelete,
+      handleResourceClick,
     };
   },
 };
@@ -867,9 +883,13 @@ export default {
   gap: 12px;
   padding: 12px 16px;
   background: #faf5ff;
+  border: none;
   border-radius: 8px;
   text-decoration: none;
   transition: all 0.15s ease;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
 
   &:hover {
     background: #f3e8ff;
