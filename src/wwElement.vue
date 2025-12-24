@@ -230,6 +230,15 @@ export default {
       return value;
     };
 
+    // ===== HELPER: Normalize resources to array =====
+    // Handles: array, single object (from Supabase join), or null/undefined
+    const normalizeResources = (resources) => {
+      if (!resources) return [];
+      if (Array.isArray(resources)) return resources.filter(r => r != null);
+      if (typeof resources === 'object') return [resources]; // Single object from join
+      return [];
+    };
+
     // ===== PROCESSED STEPS (normalized from raw data) =====
     const processedSteps = computed(() => {
       const rawSteps = props.content?.steps;
@@ -339,7 +348,8 @@ export default {
           status: String(status || ''),
           isVisible: Boolean(isVisible),
           isCompleted: finalIsCompleted,
-          resources: Array.isArray(resources) ? resources : [],
+          // Normalize resources: handle array, single object, or null/undefined
+          resources: normalizeResources(resources),
           date: combinedDate ? String(combinedDate) : null,
           isRdv: finalIsRdv,
           rdvType: rdvType ? String(rdvType) : null,
@@ -372,12 +382,19 @@ export default {
 
     const getResourceType = (resource) => {
       if (typeof resource === 'string') return null;
-      return resource?.type ?? resource?.extension ?? resource?.mime_type?.split('/').pop()?.toUpperCase() ?? null;
+      // Support Supabase: format, type fields
+      // Also support: extension, mime_type
+      const format = resource?.format ?? resource?.type ?? resource?.extension ?? null;
+      if (format) return String(format).toUpperCase();
+      if (resource?.mime_type) return resource.mime_type.split('/').pop()?.toUpperCase();
+      return null;
     };
 
     const getResourceUrl = (resource) => {
       if (typeof resource === 'string') return resource;
-      return resource?.url ?? resource?.href ?? resource?.link ?? resource?.path ?? resource?.src ?? '#';
+      // Support Supabase: url, file_path fields
+      // Also support: href, link, path, src
+      return resource?.url ?? resource?.file_path ?? resource?.href ?? resource?.link ?? resource?.path ?? resource?.src ?? '#';
     };
 
     const getResourceSize = (resource) => {
