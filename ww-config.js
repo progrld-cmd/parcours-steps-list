@@ -21,7 +21,7 @@ export default {
     {
       name: 'step-complete',
       label: { en: 'On step complete', fr: 'Étape terminée' },
-      event: { stepId: '' },
+      event: { stepId: '', stepType: '', complete: false },
     },
     {
       name: 'step-edit',
@@ -57,6 +57,7 @@ export default {
         isRdv: false,
         hasResource: false,
         resourceType: '',
+        complete: false,
         step: {},
       },
     },

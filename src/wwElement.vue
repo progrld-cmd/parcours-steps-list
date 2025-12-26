@@ -45,7 +45,7 @@
             <button
               class="status-icon-btn"
               :class="{ completed: step.isCompleted }"
-              @click.stop="handleToggleComplete(step.id, !step.isCompleted)"
+              @click.stop="handleToggleComplete(step, !step.isCompleted)"
               :title="step.isCompleted ? 'Marquer comme non terminée' : 'Marquer comme terminée'"
             >
               <svg v-if="step.isCompleted" viewBox="0 0 24 24" fill="currentColor">
@@ -171,7 +171,7 @@
             <button
               v-if="!step.isCompleted"
               class="action-button complete-button"
-              @click.stop="handleComplete(step.id)"
+              @click.stop="handleComplete(step)"
             >
               <span class="button-icon">&#x2713;</span>
               {{ content?.completeText || 'Marquer terminée' }}
@@ -500,17 +500,34 @@ export default {
       });
     };
 
-    const handleComplete = (stepId) => {
+    const getStepType = (step) => {
+      const resource = step.resources?.[0] ?? null;
+      const resourceType = resource?.type ?? resource?.format ?? null;
+      if (step.isRdv) return 'rdv';
+      if (resourceType === 'test') return 'test';
+      if (resource) return 'resource';
+      return 'etape';
+    };
+
+    const handleComplete = (step) => {
       emit('trigger-event', {
         name: 'step-complete',
-        event: { stepId },
+        event: {
+          stepId: step.id,
+          stepType: getStepType(step),
+          complete: true,
+        },
       });
     };
 
-    const handleToggleComplete = (stepId, completed) => {
+    const handleToggleComplete = (step, completed) => {
       emit('trigger-event', {
         name: 'step-complete',
-        event: { stepId, completed },
+        event: {
+          stepId: step.id,
+          stepType: getStepType(step),
+          complete: completed,
+        },
       });
     };
 
@@ -557,6 +574,7 @@ export default {
           isRdv: step.isRdv,
           hasResource: step.resources?.length > 0,
           resourceType: resourceType ? String(resourceType).toLowerCase() : null,
+          complete: step.isCompleted,
           step: step.originalItem,
         },
       });
