@@ -38,7 +38,7 @@
         </div>
 
         <!-- Card Content -->
-        <div class="card-content">
+        <div class="card-content" @click="handleStepClick(step)">
           <!-- Header Row -->
           <div class="card-header">
             <!-- Status Icon (clickable to toggle completion) -->
@@ -545,6 +545,23 @@ export default {
       });
     };
 
+    const handleStepClick = (step) => {
+      const resource = step.resources?.[0] ?? null;
+      const resourceType = resource?.type ?? resource?.format ?? null;
+
+      emit('trigger-event', {
+        name: 'step-click',
+        event: {
+          stepId: step.id,
+          stepType: step.isRdv ? 'rdv' : (resourceType === 'test' ? 'test' : (resource ? 'resource' : 'etape')),
+          isRdv: step.isRdv,
+          hasResource: step.resources?.length > 0,
+          resourceType: resourceType ? String(resourceType).toLowerCase() : null,
+          step: step.originalItem,
+        },
+      });
+    };
+
     // ===== CSS VARIABLES =====
     const cssVariables = computed(() => ({
       '--card-background': props.content?.cardBackground || '#ffffff',
@@ -587,6 +604,7 @@ export default {
       handleEdit,
       handleDelete,
       handleResourceClick,
+      handleStepClick,
     };
   },
 };

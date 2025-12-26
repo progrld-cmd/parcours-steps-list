@@ -48,6 +48,18 @@ export default {
         }
       },
     },
+    {
+      name: 'step-click',
+      label: { en: 'On step click', fr: 'Clic sur étape' },
+      event: {
+        stepId: '',
+        stepType: '',
+        isRdv: false,
+        hasResource: false,
+        resourceType: '',
+        step: {},
+      },
+    },
   ],
   properties: {
     // ===== DATA SECTION =====
